@@ -1,1 +1,64 @@
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Random;
 
+class Process {
+    int id;
+    int priority;
+    int burstTime;
+
+    public Process(int id, int priority) {
+        this.id = id;
+        this.priority = priority;
+        this.burstTime = priority;
+    }
+}
+
+public class JobPQExpansion {
+    public static void main(String[] args) {
+        Queue<Process> priorityQueue = new LinkedList<>();
+        Queue<Process> readyQueue = new LinkedList<>();
+
+        // Generate 10 processes with unique IDs and random priorities/burst times
+        for (int i = 1; i <= 10; i++) {
+            Process p = new Process(i, generateRandom());
+            priorityQueue.add(p);
+        }
+
+        // Main loop
+        int totalProcesses = 10;
+        while (totalProcesses < 25) {
+            // If priority queue is full, move a process to the ready queue
+            if (priorityQueue.size() == 10) {
+                Process p = priorityQueue.poll();
+                readyQueue.add(p);
+            }
+
+            // Generate a new process
+            Process p = new Process(totalProcesses + 1, generateRandom());
+            priorityQueue.add(p);
+            totalProcesses++;
+
+            // Print the processes in the priority queue
+            System.out.println("The processes in the priority queue are: ");
+            printQueue(priorityQueue);
+
+            // Print the processes in the ready queue
+            System.out.println("The processes in the ready queue are: ");
+            printQueue(readyQueue);
+        }
+    }
+
+    // Function to generate a random number in the range [1, 20]
+    public static int generateRandom() {
+        Random rand = new Random();
+        return rand.nextInt(20) + 1;
+    }
+
+    // Function to print the processes in a queue
+    public static void printQueue(Queue<Process> q) {
+        for (Process p : q) {
+            System.out.println("P" + p.id + ":" + p.burstTime + " ");
+        }
+    }
+}
