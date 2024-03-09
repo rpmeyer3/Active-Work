@@ -20,20 +20,51 @@ public class JobPQExpansion {
     public static void main(String[] args) {
         Queue<Process> priorityQueue = new LinkedList<>();
         Queue<Process> readyQueue = new LinkedList<>();
+        Process Processor = null;
 
+        Process lastProcess = new Process(0, 0);
         // Generate 10 processes with unique IDs and random priorities/burst times
         for (int i = 1; i <= 10; i++) {
             Process p = new Process(i, generateRandom());
             priorityQueue.add(p);
+            lastProcess = p;
         }
+
+        // Print priority queue processes - Step 0
+        System.out.println("Step 0:");
+
+        System.out.println("  The new generated process is: P" + lastProcess.id + ":" + lastProcess.burstTime);
+
+        // Print the processes in the priority queue
+        System.out.print("  The processes in the priority queue are: ");
+        printQueue(priorityQueue);
 
         // Main loop
         int totalProcesses = 10;
+        int stepCount = 1;
+
         while (totalProcesses < 25) {
-            // If priority queue is full, move a process to the ready queue
+            // If priority queue is full, a process to the ready queue
             if (priorityQueue.size() == 10) {
                 Process p = priorityQueue.poll();
                 readyQueue.add(p);
+            }
+
+            // If ready queue has a process in it, move a process into the Processor
+            if (readyQueue.size() > 0) {
+                Processor = readyQueue.poll();
+                // If burst time is 2 or more, process will use full time slice
+                if (Processor.burstTime > 1) {
+                    Processor.burstTime -= 2;
+                } 
+                // If burst time is 1, process will only use 1 millisecond of time slice
+                else {
+                    Processor.burstTime -= 1;
+                }
+                // If process is not completed during time slice, move it to the back of the ready queue
+                if (Processor.burstTime > 0) {
+                    readyQueue.add(Processor);
+                }
             }
 
             // Generate a new process
@@ -41,13 +72,29 @@ public class JobPQExpansion {
             priorityQueue.add(p);
             totalProcesses++;
 
+            // Print each step number
+            System.out.println("Step " + stepCount + ":");
+
+            // Print the newly generated process
+            System.out.println("  The new generated process is: P" + p.id + ":" + p.burstTime);
+
             // Print the processes in the priority queue
-            System.out.println("The processes in the priority queue are: ");
+            System.out.print("  The processes in the priority queue are: ");
             printQueue(priorityQueue);
 
             // Print the processes in the ready queue
-            System.out.println("The processes in the ready queue are: ");
+            System.out.print("  The processes in the ready queue are: ");
             printQueue(readyQueue);
+
+            // Print the Process in the Processor
+            if (Processor != null) {
+                System.out.println("  The Process currently in the Processor is: P" + Processor.id + ":" + Processor.burstTime);
+            }
+
+            // Increment Step Counter
+            stepCount++;
+            // Add spacing
+            System.out.println();
         }
     }
 
@@ -59,8 +106,14 @@ public class JobPQExpansion {
 
     // Function to print the processes in a queue
     public static void printQueue(Queue<Process> q) {
+        int count = 0;
         for (Process p : q) {
-            System.out.println("P" + p.id + ":" + p.burstTime + " ");
+            count++;
+            System.out.print("P" + p.id + ":" + p.burstTime);
+            if (count < q.size()) {
+                System.out.print(", ");
+            }
         }
+        System.out.println();
     }
 }
