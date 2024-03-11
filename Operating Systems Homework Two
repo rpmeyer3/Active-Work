@@ -1,66 +1,88 @@
-// Homework Two So-Far
-
-import java.util.LinkedList;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
-class Process {
-    int id;
-    int priority;
-    int burstTime;
+public class ProcessScheduler {
+    public static void main(String[] args) {
+        // Initialize the priority queue for long-term processes
+        PriorityQueue<Process> longTermQueue = new PriorityQueue<>();
 
-    public Process(int id, int priority) {
-        this.id = id;
-        this.priority = priority;
-        this.burstTime = priority;
+        // Generate 10 initial processes with random priorities and execution times
+        Random rand = new Random();
+        for (int i = 1; i <= 10; i++) {
+            int priority = rand.nextInt(10) + 1; // Random priority [1-10]
+            int executionTime = rand.nextInt(20) + 1; // Random execution time [1-20]
+            Process process = new Process("P" + i, priority, executionTime);
+            longTermQueue.add(process);
+        }
+
+        // Initialize the ready queue for short-term processes (Round Robin)
+        Queue<Process> readyQueue = new PriorityQueue<>(5, (p1, p2) -> Integer.compare(p1.getPriority(), p2.getPriority()));
+
+        // Generate and process additional 15 processes
+        int totalProcessesGenerated = 10;
+        while (totalProcessesGenerated < 25) {
+            // Generate a new process
+            int priority = rand.nextInt(10) + 1;
+            int executionTime = rand.nextInt(20) + 1;
+            Process newProcess = new Process("P" + (totalProcessesGenerated + 1), priority, executionTime);
+
+            // Add the new process to the long-term queue
+            longTermQueue.add(newProcess);
+            totalProcessesGenerated++;
+
+            // Move processes from long-term queue to ready queue (if needed)
+            while (!longTermQueue.isEmpty() && readyQueue.size() < 5) {
+                Process nextProcess = longTermQueue.poll();
+                readyQueue.add(nextProcess);
+            }
+
+            // Print process information
+            System.out.println("Step " + (totalProcessesGenerated - 10) + ":");
+            System.out.println("The new generated process is " + newProcess);
+            System.out.print("The processes in the priority queue are: ");
+            for (Process p : longTermQueue) {
+                System.out.print(p + " ");
+            }
+            System.out.print("\nThe processes in the ready queue are: ");
+            for (Process p : readyQueue) {
+                System.out.print(p + " ");
+            }
+            System.out.println("\n");
+        }
     }
 }
 
-public class JobPQExpansion {
-    public static void main(String[] args) {
-        Queue<Process> priorityQueue = new LinkedList<>();
-        Queue<Process> readyQueue = new LinkedList<>();
+class Process implements Comparable<Process> {
+    private String processId;
+    private int priority;
+    private int executionTime;
 
-        // Generate 10 processes with unique IDs and random priorities/burst times
-        for (int i = 1; i <= 10; i++) {
-            Process p = new Process(i, generateRandom());
-            priorityQueue.add(p);
-        }
-
-        // Main loop
-        int totalProcesses = 10;
-        while (totalProcesses < 25) {
-            // If priority queue is full, move a process to the ready queue
-            if (priorityQueue.size() == 10) {
-                Process p = priorityQueue.poll();
-                readyQueue.add(p);
-            }
-
-            // Generate a new process
-            Process p = new Process(totalProcesses + 1, generateRandom());
-            priorityQueue.add(p);
-            totalProcesses++;
-
-            // Print the processes in the priority queue
-            System.out.println("The processes in the priority queue are: ");
-            printQueue(priorityQueue);
-
-            // Print the processes in the ready queue
-            System.out.println("The processes in the ready queue are: ");
-            printQueue(readyQueue);
-        }
+    public Process(String processId, int priority, int executionTime) {
+        this.processId = processId;
+        this.priority = priority;
+        this.executionTime = executionTime;
     }
 
-    // Function to generate a random number in the range [1, 20]
-    public static int generateRandom() {
-        Random rand = new Random();
-        return rand.nextInt(20) + 1;
+    public String getProcessId() {
+        return processId;
     }
 
-    // Function to print the processes in a queue
-    public static void printQueue(Queue<Process> q) {
-        for (Process p : q) {
-            System.out.println("P" + p.id + ":" + p.burstTime + " ");
-        }
+    public int getPriority() {
+        return priority;
+    }
+
+    public int getExecutionTime() {
+        return executionTime;
+    }
+
+    @Override
+    public int compareTo(Process other) {
+        return Integer.compare(this.priority, other.priority);
+    }
+
+    @Override
+    public String toString() {
+        return processId + ":" + priority;
     }
 }
