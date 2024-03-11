@@ -1,8 +1,31 @@
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
+/*
+      Initial Comment
+   a. The purpose of this program is to extend what was done in the first homework by assigning each process a unique process id
+      creating a ready queue, and out put of the priority queue, then printing out the process id's
+   b. Ryan Meyer and Nathaniel Sullivano
+   c. The program requires no outside input as the program automatically generates the inputs necessary for the program
+   d. In order to use the program just compile and run it with no additional input
+   e. The program expects a process object that implement the comparable interface in order to print the necessary information
+   f. There are currently no issues that could happen except for the still ever so slim chance of a meteorite striking your current location
 
+*/
 public class ProcessScheduler {
+     /*
+
+        No Necessary Pre-Inputs
+        ---
+        Expected Post Conditions / Output
+        ---
+        Step 14:
+        The new generated process is P24:1
+        The processes in the priority queue are: P19:1 P21:1 P17:3 P24:1 P15:7 P18:5 P20:3 P13:7 P22:4 P11:9 P16:8 P9:10 P2:7 P3:7 P12:4 P5:9 P14:8 P1:9 P23:4
+        The processes in the ready queue are: P8:1 P6:3 P10:5 P7:5 P4:7
+        ---
+
+     */
     public static void main(String[] args) {
         // Initialize the priority queue for long-term processes
         PriorityQueue<Process> longTermQueue = new PriorityQueue<>();
@@ -16,7 +39,7 @@ public class ProcessScheduler {
             longTermQueue.add(process);
         }
 
-        // Initialize the ready queue for short-term processes (Round Robin)
+        // Initialize the ready queue for short-term processes in the lovely in-efficient round-robin style
         Queue<Process> readyQueue = new PriorityQueue<>(5, (p1, p2) -> Integer.compare(p1.getPriority(), p2.getPriority()));
 
         // Generate and process additional 15 processes
