@@ -1,10 +1,11 @@
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
+
 /*
       Initial Comment
    a. The purpose of this program is to extend what was done in the first homework by assigning each process a unique process id
-      creating a ready queue, and out put of the priority queue, then printing out the process id's
+      creating a ready queue, and output of the priority queue, then printing out the process id's, as well as simulating the processor's function
    b. Ryan Meyer and Nathaniel Sullivano
    c. The program requires no outside input as the program automatically generates the inputs necessary for the program
    d. In order to use the program just compile and run it with no additional input
@@ -13,18 +14,19 @@ import java.util.Random;
 
 */
 public class ProcessScheduler {
-     /*
-
-        No Necessary Pre-Inputs
-        ---
-        Expected Post Conditions / Output
-        ---
-        Step 14:
-        The new generated process is P24:1
-        The processes in the priority queue are: P19:1 P21:1 P17:3 P24:1 P15:7 P18:5 P20:3 P13:7 P22:4 P11:9 P16:8 P9:10 P2:7 P3:7 P12:4 P5:9 P14:8 P1:9 P23:4
-        The processes in the ready queue are: P8:1 P6:3 P10:5 P7:5 P4:7
-        ---
-
+    /*
+     * 
+     * No Necessary Pre-Inputs
+     * ---
+     * Expected Post Conditions / Output
+     * ---
+     * Step 15:
+     * The new generated process is P25:2
+     * The processes in the priority queue are: P24:3 P7:6 P11:8 P13:8 P2:7 P23:9 P20:10 P4:9 P9:8 P10:10 P21:7
+     * The processes in the ready queue are: P25:2 P16:5 P5:5 P8:6 P3:5
+     * The Process in the Processor is: P19:5
+     * ---
+     * 
      */
     public static void main(String[] args) {
         // Initialize the priority queue for long-term processes
@@ -32,15 +34,31 @@ public class ProcessScheduler {
 
         // Generate 10 initial processes with random priorities and execution times
         Random rand = new Random();
+        Process lastProcess = null;
         for (int i = 1; i <= 10; i++) {
             int priority = rand.nextInt(10) + 1; // Random priority [1-10]
             int executionTime = rand.nextInt(20) + 1; // Random execution time [1-20]
             Process process = new Process("P" + i, priority, executionTime);
             longTermQueue.add(process);
+            lastProcess = process;
         }
+
+        // Print step 0
+        System.out.println("Step 0:");
+        System.out.println("  The new generated process is " + lastProcess);
+        System.out.print("  The processes in the priority queue are: ");
+        for (Process p : longTermQueue) {
+            System.out.print(p + " ");
+        }
+        System.out.print("\n  The processes in the ready queue are: ");
+        System.out.println("\n  The Process in the Processor is: ");
+
 
         // Initialize the ready queue for short-term processes in the lovely in-efficient round-robin style
         Queue<Process> readyQueue = new PriorityQueue<>(5, (p1, p2) -> Integer.compare(p1.getPriority(), p2.getPriority()));
+
+        // Initialize the "processor" - a Process that represents the process being processed
+        Process Processor = null;
 
         // Generate and process additional 15 processes
         int totalProcessesGenerated = 10;
@@ -54,24 +72,44 @@ public class ProcessScheduler {
             longTermQueue.add(newProcess);
             totalProcessesGenerated++;
 
+            // If a process is ready, begin processing
+            if (!readyQueue.isEmpty()) {
+                Processor = readyQueue.poll();
+            }
             // Move processes from long-term queue to ready queue (if needed)
-            while (!longTermQueue.isEmpty() && readyQueue.size() < 5) {
+            if (!longTermQueue.isEmpty() && readyQueue.size() < 5) {
                 Process nextProcess = longTermQueue.poll();
                 readyQueue.add(nextProcess);
             }
 
             // Print process information
             System.out.println("Step " + (totalProcessesGenerated - 10) + ":");
-            System.out.println("The new generated process is " + newProcess);
-            System.out.print("The processes in the priority queue are: ");
+            System.out.println("  The new generated process is " + newProcess);
+            System.out.print("  The processes in the priority queue are: ");
             for (Process p : longTermQueue) {
                 System.out.print(p + " ");
             }
-            System.out.print("\nThe processes in the ready queue are: ");
+            System.out.print("\n  The processes in the ready queue are: ");
             for (Process p : readyQueue) {
                 System.out.print(p + " ");
             }
-            System.out.println("\n");
+            if (Processor == null) {
+                System.out.println("\n  The Process in the Processor is: ");
+            } else {
+                System.out.println("\n  The Process in the Processor is: " + Processor.toString());
+
+                // Simulates processing with 2 ms time slice (If a process finishes in 1 ms, it will move on to the next process)
+                if (Processor.getPriority() < 2) {
+                    Processor.setPriority(Processor.getPriority() - 1);
+                } else {
+                    Processor.setPriority(Processor.getPriority() - 2);
+                }
+
+                // If the process is not yet complete, add it back to the ready queue
+                if (Processor.getPriority() > 0) {
+                    readyQueue.add(Processor);
+                }
+            }
         }
     }
 }
@@ -97,6 +135,10 @@ class Process implements Comparable<Process> {
 
     public int getExecutionTime() {
         return executionTime;
+    }
+
+    public void setPriority(int p) {
+        priority = p;
     }
 
     @Override
